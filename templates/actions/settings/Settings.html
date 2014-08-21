@@ -1,0 +1,37 @@
+<h1>Рекомендуемые товары PRO</h1>
+<div class="fields form">
+    <form action="?module=plugins&id=related&action=save" method="post" id="plugins-settings-form">
+        {$wa->csrf()}
+
+
+        {literal}
+            <p>{shopRelatedPlugin::getProducts($product.id)} - Код хелпера получения списка рекомендуемых товаров для товара с идентификатором $product.id</p>
+        {/literal}
+
+        <div class="field-group">
+            <div class="field">
+                <div class="name">
+                    Статус плагина
+                </div>
+                <div class="value">
+                    <select name="shop_related[status]">
+                        <option {if $settings.status == 1} selected="selected"{/if} value="1">Включен</option>
+                        <option {if $settings.status == 0} selected="selected"{/if} value="0">Выключен</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <div class="field">
+            <div class="value submit">
+                <input type="submit" class="button green" value="Сохранить">
+                <span id="plugins-settings-form-status" style="display:none">
+                    <i style="vertical-align:middle" class="icon16 yes"></i> [`Saved`]
+                </span>
+            </div>
+        </div>
+    </form>
+</div>

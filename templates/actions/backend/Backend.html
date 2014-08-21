@@ -1,0 +1,123 @@
+<div class="fields">
+    <div class="field-group">
+        <div class="field">
+            <div class="name">
+                Рекомендуемые товары PRO
+            </div>
+            <div class="value">
+                <label><input type="radio" name="relatedpro" value="0" {if !$product.relatedpro}checked="true"{/if}> Выкл</label>
+            </div>
+            <div class="value">
+                <label><input type="radio" name="relatedpro" value="1" {if $product.relatedpro}checked="true"{/if}> Выбрать вручную</label>
+            </div>
+            <div class="value manually" {if !$product.relatedpro}style="display:none"{/if}>
+                <table class="relatedpro zebra">
+                    {foreach $related as $p}
+                        <tr class="p" data-product-id="{$p.id}">
+                            <td class="p_name">{$p.name|escape}</td>
+                            <td class="p_summary">{$p.summary|escape}</td>
+                            <td>{shop_currency($p.price, $p.currency)}</td>
+                            <td class="min-width"><a class="edit" href="#"><i class="icon16 edit"></i></a><a class="delete" href="#"><i class="icon16 cross"></i></a></td>
+                        </tr>
+                    {/foreach}
+                    <tr>
+                        <td colspan="4">
+                            <input class="relatedpro-autocomplete long" type="text" placeholder="Начните вводить название товара или артикул">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(function() {
+        $('.relatedpro-autocomplete').autocomplete({
+            source: '?plugin=related&action=autocomplete',
+            minLength: 3,
+            delay: 300,
+            select: function(event, ui) {
+                var tr = $('<tr class="p" data-product-id="' + ui.item.id + '"></tr>');
+                tr.append($('<td class="p_name"></td>').html(ui.item.value));
+                tr.append($('<td class="p_summary"></td>').html(ui.item.summary));
+                tr.append($('<td></td>').html(ui.item.price));
+                tr.append('<td class="min-width"><a class="edit" href="#"><i class="icon16 edit"></i></a><a class="delete" href="#"><i class="icon16 cross"></i></a></td>');
+                tr.insertBefore($(this).closest('tr'));
+                $(this).val('');
+                $.post('?plugin=related&action=save', {
+                    'product_id': {$product.id},
+                    'related_product_id': ui.item.id
+                }, function(response) {
+
+                }, "json");
+                return false;
+            }
+        });
+        $('input[name="relatedpro"]').click(function() {
+            if (this.value == 1) {
+                $(this).closest('div.field').find('.manually').show();
+                $.post('?plugin=related&action=save', {
+                    'product_id': {$product.id},
+                    'relatedpro': 1
+                }, function(response) {
+                }, "json");
+            } else {
+                $(this).closest('div.field').find('.manually').hide().find('tr.p').remove();
+                $.post('?plugin=related&action=save', {
+                    'product_id': {$product.id},
+                    'delete': 1,
+                    'relatedpro': 0
+                }, function(response) {
+                }, "json");
+            }
+        });
+
+        $("table.relatedpro").on('click', 'a.edit', function() {
+            var tr = $(this).closest('tr');
+            var name = tr.find('.p_name').text();
+            var summary = tr.find('.p_summary').text();
+            tr.find('.p_name').html('<input type="text" name="" value="' + name + '" />');
+            tr.find('.p_summary').html('<textarea name="">' + summary + '</textarea>');
+            $(this).replaceWith('<a class="save" href="#"><i class="icon16 yes"></i></a>');
+            return false;
+        });
+
+        $("table.relatedpro").on('click', 'a.save', function() {
+            var tr = $(this).closest('tr');
+            var name = tr.find('.p_name input').val();
+            var summary = tr.find('.p_summary textarea').text();
+            var self = this;
+            $.post('?plugin=related&action=save', {
+                'product_id': {$product.id},
+                'related_product_id': tr.data('product-id'),
+                'name': name,
+                'summary': summary
+            }, function(response) {
+                if (response.status == 'ok') {
+                    tr.find('.p_name').html(name);
+                    tr.find('.p_summary').html(summary);
+                    $(self).replaceWith('<a class="edit" href="#"><i class="icon16 edit"></i></a>');
+                } else {
+                    alert(response.data.errors.join(', '));
+                }
+            }, "json");
+            return false;
+        });
+
+        $("table.relatedpro").on('click', 'a.delete', function() {
+            var tr = $(this).closest('tr');
+            $.post('?plugin=related&action=save', {
+                'product_id': {$product.id},
+                'related_product_id': tr.data('product-id'),
+                'delete': 1
+            }, function(response) {
+                if (response.status == 'ok') {
+                    tr.remove();
+                }
+            }, "json");
+            return false;
+        });
+    });
+</script>

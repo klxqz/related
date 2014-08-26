@@ -14,16 +14,19 @@ class shopRelatedPluginBackendSaveController extends waJsonController {
 
         if ($relatedpro != -1) {
             $p_model->updateById($product_id, array('relatedpro' => $relatedpro));
+            if ($relatedpro == 0) {
+                $delete_by = array('product_id' => $product_id);
+                $model->deleteByField($delete_by);
+            }
         }
 
 
-        if ($is_delete) {
-            $delete_by = array('product_id' => $product_id);
-            if ($related_product_id) {
-                $delete_by['related_product_id'] = $related_product_id;
-            }
+
+        if ($is_delete && $related_product_id) {
+
+            $delete_by['related_product_id'] = $related_product_id;
             $model->deleteByField($delete_by);
-        } else {
+        } elseif ($product_id && $related_product_id) {
             $data = array(
                 'product_id' => $product_id,
                 'related_product_id' => $related_product_id,

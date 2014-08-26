@@ -1,3 +1,4 @@
+{$wa->csrf()}
 <div class="fields">
     <div class="field-group">
         <div class="field">
@@ -29,7 +30,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script type="text/javascript">
@@ -47,6 +47,7 @@
                 tr.insertBefore($(this).closest('tr'));
                 $(this).val('');
                 $.post('?plugin=related&action=save', {
+                    '_csrf': $('input[name="_csrf"]').val(),
                     'product_id': {$product.id},
                     'related_product_id': ui.item.id
                 }, function(response) {
@@ -59,6 +60,7 @@
             if (this.value == 1) {
                 $(this).closest('div.field').find('.manually').show();
                 $.post('?plugin=related&action=save', {
+                    '_csrf': $('input[name="_csrf"]').val(),
                     'product_id': {$product.id},
                     'relatedpro': 1
                 }, function(response) {
@@ -66,8 +68,8 @@
             } else {
                 $(this).closest('div.field').find('.manually').hide().find('tr.p').remove();
                 $.post('?plugin=related&action=save', {
+                    '_csrf': $('input[name="_csrf"]').val(),
                     'product_id': {$product.id},
-                    'delete': 1,
                     'relatedpro': 0
                 }, function(response) {
                 }, "json");
@@ -87,9 +89,10 @@
         $("table.relatedpro").on('click', 'a.save', function() {
             var tr = $(this).closest('tr');
             var name = tr.find('.p_name input').val();
-            var summary = tr.find('.p_summary textarea').text();
+            var summary = tr.find('.p_summary textarea').val();
             var self = this;
             $.post('?plugin=related&action=save', {
+                '_csrf': $('input[name="_csrf"]').val(),
                 'product_id': {$product.id},
                 'related_product_id': tr.data('product-id'),
                 'name': name,
@@ -109,6 +112,7 @@
         $("table.relatedpro").on('click', 'a.delete', function() {
             var tr = $(this).closest('tr');
             $.post('?plugin=related&action=save', {
+                '_csrf': $('input[name="_csrf"]').val(),
                 'product_id': {$product.id},
                 'related_product_id': tr.data('product-id'),
                 'delete': 1
